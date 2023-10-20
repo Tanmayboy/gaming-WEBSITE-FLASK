@@ -18,6 +18,7 @@ const pipeGap = 100;
 const pipeSpeed = 3;
 
 let score = 0;
+let isGameOver = false;
 
 function drawBird() {
     ctx.beginPath();
@@ -39,25 +40,53 @@ function drawScore() {
     ctx.fillText(`Score: ${score}`, 10, 30);
 }
 
+function drawStartScreen() {
+    ctx.fillStyle = '#000000';
+    ctx.font = '30px Arial';
+    ctx.fillText('Flappy Bird Game', canvas.width / 2 - 150, canvas.height / 2 - 50);
+    ctx.font = '20px Arial';
+    ctx.fillText('Press Space to Start', canvas.width / 2 - 120, canvas.height / 2);
+}
+
+function drawEndScreen() {
+    ctx.fillStyle = '#000000';
+    ctx.font = '30px Arial';
+    ctx.fillText('Game Over', canvas.width / 2 - 80, canvas.height / 2 - 50);
+    ctx.font = '20px Arial';
+    ctx.fillText(`Your Score: ${score}`, canvas.width / 2 - 80, canvas.height / 2);
+    ctx.fillText('Press Space to Restart', canvas.width / 2 - 120, canvas.height / 2 + 50);
+}
+
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    drawBird();
+    if (isGameOver) {
+        drawEndScreen();
+    } else if (score === 0) {
+        drawStartScreen();
+    } else {
+        drawBird();
 
-    for (const pipe of pipes) {
-        drawPipe(pipe.x, pipe.height);
+        for (const pipe of pipes) {
+            drawPipe(pipe.x, pipe.height);
+        }
+
+        drawScore();
     }
-
-    drawScore();
 }
 
 function update() {
+    if (isGameOver) {
+        return;
+    }
+
     bird.velocity += bird.gravity;
     bird.y += bird.velocity;
 
     if (bird.y > canvas.height - bird.radius) {
         bird.y = canvas.height - bird.radius;
         bird.velocity = 0;
+        gameOver();
     }
 
     if (bird.y < bird.radius) {
@@ -79,7 +108,7 @@ function update() {
             (bird.y - bird.radius < pipes[i].height || bird.y + bird.radius > pipes[i].height + pipeGap)
         ) {
             // Collision detected
-            resetGame();
+            gameOver();
             return;
         }
 
@@ -91,16 +120,27 @@ function update() {
     }
 }
 
+function gameOver() {
+    isGameOver = true;
+}
+
 function resetGame() {
     bird.y = canvas.height / 2 - 15;
     bird.velocity = 0;
     pipes.length = 0;
     score = 0;
+    isGameOver = false;
 }
 
 function handleKeyPress(event) {
     if (event.key === ' ' || event.key === 'Spacebar') {
-        bird.velocity = -bird.jumpStrength;
+        if (isGameOver) {
+            resetGame();
+        } else if (score === 0) {
+            // Start the game
+        } else {
+            bird.velocity = -bird.jumpStrength;
+        }
     }
 }
 
