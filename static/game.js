@@ -134,17 +134,14 @@ function resetGame() {
 
 function handleKeyPress(event) {
     if (event.key === ' ' || event.key === 'Spacebar') {
-        if (isGameOver) {
+        if (isGameOver || score === 0) {
             resetGame();
-            isGameOver = false;  // Reset the game over flag
-        } else if (score === 0) {
-            // Start the game
-            bird.velocity = -bird.jumpStrength;
         } else {
             bird.velocity = -bird.jumpStrength;
         }
     }
 }
+
 
 document.addEventListener('keydown', handleKeyPress);
 
